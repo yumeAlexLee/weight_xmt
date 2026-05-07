@@ -11,11 +11,7 @@ from datetime import datetime
 CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "weight.csv")
 HTML_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "index.html")
 TARGET_WEIGHT = 45
-GH_TOKEN = os.environ.get("GH_PAT", "")
-GH_OWNER = "yumeAlexLee"
-GH_REPO = "weight_xmt"
-GH_BRANCH = "main"
-CSV_GITHUB_PATH = "data/weight.csv"
+WORKER_URL = os.environ.get("WORKER_URL", "https://weight-xmt.yumealexlee.workers.dev")
 
 
 def read_weight_data():
@@ -467,8 +463,7 @@ def generate_html(records, stats):
       if (chartData.labels.length > 0) initChart();
     }});
 
-GH_TOKEN = '{GH_TOKEN}'
-GH_REPO_API = 'https://api.github.com/repos/{GH_OWNER}/{GH_REPO}/contents/{CSV_GITHUB_PATH}'
+const WORKER_URL = '{WORKER_URL}';
 
 function showToast(msg, type) {{
   var t = document.getElementById('toast');
@@ -486,41 +481,19 @@ function addWeight() {{
   var btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = '提交中...';
 
-  // Read current CSV, append, write back via GitHub API
-  fetch(GH_REPO_API, {{
-    headers: {{ 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json' }}
+  fetch(WORKER_URL, {{
+    method: 'POST',
+    headers: {{ 'Content-Type': 'application/json' }},
+    body: JSON.stringify({{ date: date, weight: parseFloat(weight), note: note }})
   }})
   .then(function(r) {{ return r.json(); }})
   .then(function(data) {{
-    var currentContent = atob(data.content);
-    var sha = data.sha;
-    var noteStr = note ? ',' + note : ',';
-    var newLine = date + ',' + weight + noteStr + '\\n';
-    var newContent = currentContent + newLine;
-
-    return fetch(GH_REPO_API, {{
-      method: 'PUT',
-      headers: {{
-        'Authorization': 'Bearer ' + GH_TOKEN,
-        'Accept': 'application/vnd.github+json',
-        'Content-Type': 'application/json',
-      }},
-      body: JSON.stringify({{
-        message: 'add weight: ' + date + ' ' + weight + 'kg',
-        content: btoa(newContent),
-        sha: sha,
-        branch: 'main',
-      }})
-    }});
-  }})
-  .then(function(r) {{ return r.json(); }})
-  .then(function(data) {{
-    if (data.content) {{
+    if (data.success) {{
       showToast('✅ 记录成功！请刷新页面', 'success');
       document.getElementById('input-weight').value = '';
       document.getElementById('input-note').value = '';
     }} else {{
-      showToast('❌ ' + (data.message || '提交失败'), 'error');
+      showToast('❌ ' + (data.error || '提交失败'), 'error');
     }}
   }})
   .catch(function(err) {{
