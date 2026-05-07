@@ -404,9 +404,11 @@ def generate_html(records, stats):
       .then(function(r) {{ return r.json(); }})
       .then(function(data) {{
         if (data.content) {{
-          showToast('✅ 记录成功！请刷新页面', 'success');
+          showToast('✅ 记录成功！数据更新中...', 'success');
           document.getElementById('input-weight').value = '';
           document.getElementById('input-note').value = '';
+          // 自动刷新，等工作流和 Pages 同步
+          setTimeout(function() {{ location.reload(); }}, 12000);
         }} else {{
           if (data.message && data.message.includes('Bad credentials')) {{
             showToast('❌ 令牌无效或已过期，请重新输入', 'error');
