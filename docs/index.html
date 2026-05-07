@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>体重记录 - 小夏</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .container { max-width: 900px; width: 100%; margin: 0 auto; }
+
+    .header { padding: 8px 0 16px; }
+    .header h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+    .header p { color: #64748b; font-size: 13px; margin-top: 2px; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: #1e293b;
+      border-radius: 14px;
+      padding: 14px 12px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+    .stat-card .label { font-size: 11px; color: #64748b; margin-bottom: 2px; letter-spacing: 0.3px; }
+    .stat-card .value { font-size: 24px; font-weight: 700; line-height: 1.3; }
+    .stat-card .value.loss { color: #22c55e; }
+    .stat-card .value.gain { color: #ef4444; }
+    .stat-card .value.neutral { color: #facc15; }
+
+    .card {
+      background: #1e293b;
+      border-radius: 14px;
+      padding: 18px;
+      border: 1px solid #334155;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .form-row-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12px; color: #64748b; font-weight: 500; }
+    .form-group input, .form-group select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #e2e8f0;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-group input:focus { border-color: #3b82f6; }
+    .form-group input::placeholder { color: #475569; }
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .btn:active { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .chart-wrapper { padding: 0; border: none; background: transparent; }
+    .chart-wrapper canvas { width: 100% !important; }
+
+    .table-wrap { overflow-x: auto; margin-top: -4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      color: #64748b;
+      font-weight: 500;
+      font-size: 12px;
+      border-bottom: 1px solid #334155;
+    }
+    td { padding: 10px 12px; border-bottom: 1px solid #1e293b; }
+    td:first-child { font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 13px; }
+    tr:last-child td { border-bottom: none; }
+    .note { color: #94a3b8; font-size: 12px; }
+
+    .toast {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 100;
+      display: none;
+      text-align: center;
+    }
+    .toast.success { background: #166534; color: #bbf7d0; display: block; }
+    .toast.error { background: #7f1d1d; color: #fecaca; display: block; }
+
+    .footer { text-align: center; color: #475569; font-size: 12px; padding: 8px 0 40px; }
+
+    @media (min-width: 640px) {
+      body { padding: 32px; }
+      .header h1 { font-size: 26px; }
+      .stats-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+      .form-row-inputs { grid-template-columns: 1fr 1fr 1fr; }
+      .card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📉 小夏的体重记录</h1>
+      <p>记录每日体重变化</p>
+    </div>
+
+    
+
+    <div class="card">
+      <div class="card-title">✏️ 记录体重</div>
+      <div class="form-grid">
+        <div class="form-row-inputs">
+          <div class="form-group">
+            <label>日期</label>
+            <input type="date" id="input-date">
+          </div>
+          <div class="form-group">
+            <label>体重 (kg)</label>
+            <input type="number" id="input-weight" step="0.1" min="25" max="80" placeholder="45.0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>备注 (可选)</label>
+          <input type="text" id="input-note" placeholder="例: 朝食前">
+        </div>
+        <button class="btn" id="btn-submit" onclick="addWeight()">提交</button>
+      </div>
+      <div id="toast" class="toast"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 体重变化曲线</div>
+      <div class="chart-wrapper">
+        <canvas id="weightChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 记录明细</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>日期</th><th>体重</th><th>备注</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">在网站上记录体重即可 ✨</div>
+  </div>
+
+  <script>
+    const chartData = {"labels": [], "weights": [], "ma7": [], "target": 45, "maxIdx": 0, "maxVal": 0, "minIdx": 0, "minVal": 0, "rawDates": []};
+
+    function initChart() {
+      const ctx = document.getElementById('weightChart').getContext('2d');
+
+      // Build datasets
+      var datasets = [
+        {
+          label: '体重 (kg)',
+          data: chartData.weights,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.08)',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHitRadius: 8,
+          tension: 0.3,
+          fill: true,
+        }
+      ];
+
+      // 7-day MA
+      if (chartData.ma7 && chartData.ma7.filter(function(v) { return v !== null; }).length > 0) {
+        datasets.push({
+          label: '7日平均',
+          data: chartData.ma7,
+          borderColor: 'rgba(251, 146, 60, 0.7)',
+          borderWidth: 2,
+          borderDash: [6, 3],
+          pointRadius: 0,
+          tension: 0.4,
+          fill: false,
+        });
+      }
+
+      // Target line
+      var targetLine = new Array(chartData.labels.length).fill(chartData.target);
+      datasets.push({
+        label: '目标 ' + chartData.target + 'kg',
+        data: targetLine,
+        borderColor: 'rgba(34, 197, 94, 0.3)',
+        borderWidth: 1,
+        borderDash: [4, 4],
+        pointRadius: 0,
+        fill: false,
+      });
+
+      // Custom plugin for min/max labels (no external CDN needed)
+      var labelPlugin = {
+        id: 'minMaxLabels',
+        afterDraw: function(chart) {
+          var ctx = chart.ctx;
+          var meta = chart.getDatasetMeta(0);
+          if (!meta || !meta.data || meta.data.length < 3) return;
+          var maxPt = meta.data[chartData.maxIdx];
+          var minPt = meta.data[chartData.minIdx];
+          if (!maxPt || !minPt) return;
+
+          ctx.save();
+          ctx.textAlign = 'center';
+
+          // Max label (red dot + value)
+          var mx = maxPt.x, my = maxPt.y;
+          ctx.beginPath();
+          ctx.arc(mx, my, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#ef4444';
+          ctx.fill();
+          ctx.font = 'bold 10px -apple-system, sans-serif';
+          ctx.fillStyle = '#fca5a5';
+          ctx.fillText(chartData.maxVal + 'kg', mx, my - 12);
+
+          // Min label (green dot + value)
+          var nx = minPt.x, ny = minPt.y;
+          ctx.beginPath();
+          ctx.arc(nx, ny, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#22c55e';
+          ctx.fill();
+          ctx.font = 'bold 10px -apple-system, sans-serif';
+          ctx.fillStyle = '#86efac';
+          ctx.fillText(chartData.minVal + 'kg', nx, ny + 18);
+
+          ctx.restore();
+        }
+      };
+
+      new Chart(ctx, {
+        type: 'line',
+        data: { labels: chartData.labels, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          aspectRatio: 1.6,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'start',
+              labels: { color: '#94a3b8', font: { size: 11 }, usePointStyle: true, padding: 12, boxWidth: 10 }
+            },
+            tooltip: {
+              backgroundColor: '#1e293b',
+              titleColor: '#e2e8f0',
+              bodyColor: '#cbd5e1',
+              borderColor: '#334155',
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                title: function(items) {
+                  var i = items[0].dataIndex;
+                  return chartData.rawDates ? chartData.rawDates[i] : items[0].label;
+                },
+                label: function(context) {
+                  if (context.dataset.label.includes('目标')) return context.dataset.label;
+                  return context.parsed.y + 'kg';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#64748b',
+                font: { size: 10 },
+                maxRotation: 0,
+                maxTicksLimit: 12,
+                callback: function(val, idx) {
+                  return chartData.labels[idx];
+                }
+              }
+            },
+            y: {
+              min: 35,
+              max: 60,
+              grid: { color: 'rgba(51, 65, 85, 0.4)' },
+              ticks: {
+                color: '#64748b',
+                font: { size: 11 },
+                stepSize: 1,
+                callback: function(v) { return v + 'kg'; }
+              }
+            }
+          }
+        },
+        plugins: [labelPlugin]
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var today = new Date().toISOString().split('T')[0];
+      if (document.getElementById('input-date')) {
+        document.getElementById('input-date').value = today;
+        document.getElementById('input-date').max = today;
+      }
+      if (chartData.labels.length > 0) initChart();
+    });
+
+GH_TOKEN = ''
+GH_REPO_API = 'https://api.github.com/repos/yumeAlexLee/weight_xmt/contents/data/weight.csv'
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  setTimeout(function() { t.className = 'toast'; }, 3000);
+}
+
+function addWeight() {
+  var date = document.getElementById('input-date').value;
+  var weight = document.getElementById('input-weight').value;
+  var note = document.getElementById('input-note').value.trim();
+  if (!date) { showToast('请选择日期', 'error'); return; }
+  if (!weight) { showToast('请输入体重', 'error'); return; }
+  var btn = document.getElementById('btn-submit');
+  btn.disabled = true; btn.textContent = '提交中...';
+
+  // Read current CSV, append, write back via GitHub API
+  fetch(GH_REPO_API, {
+    headers: { 'Authorization': 'Bearer ' + GH_TOKEN, 'Accept': 'application/vnd.github+json' }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var currentContent = atob(data.content);
+    var sha = data.sha;
+    var noteStr = note ? ',' + note : ',';
+    var newLine = date + ',' + weight + noteStr + '\n';
+    var newContent = currentContent + newLine;
+
+    return fetch(GH_REPO_API, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + GH_TOKEN,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: 'add weight: ' + date + ' ' + weight + 'kg',
+        content: btoa(newContent),
+        sha: sha,
+        branch: 'main',
+      })
+    });
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.content) {
+      showToast('✅ 记录成功！请刷新页面', 'success');
+      document.getElementById('input-weight').value = '';
+      document.getElementById('input-note').value = '';
+    } else {
+      showToast('❌ ' + (data.message || '提交失败'), 'error');
+    }
+  })
+  .catch(function(err) {
+    showToast('❌ 网络错误: ' + err.message, 'error');
+  })
+  .finally(function() {
+    btn.disabled = false; btn.textContent = '提交';
+  });
+}
+  </script>
+</body>
+</html>

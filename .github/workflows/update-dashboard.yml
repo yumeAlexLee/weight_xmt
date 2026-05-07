@@ -1,0 +1,35 @@
+name: 更新体重看板
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/weight.csv'
+  workflow_dispatch:
+
+jobs:
+  generate-dashboard:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate dashboard
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: python scripts/generate_dashboard.py
+
+      - name: Commit and push to GitHub
+        run: |
+          git config user.name "yumeAlexLee"
+          git config user.email "yumealexlee@gmail.com"
+          git add docs/index.html
+          git diff --staged --quiet || git commit -m "auto: update weight dashboard"
+          git push
