@@ -151,6 +151,24 @@
     </div>
 
     
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">当前体重</div>
+        <div class="value">56.6kg</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">已减</div>
+        <div class="value neutral">0.0kg</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">剩余</div>
+        <div class="value">11.6kg</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">已记录</div>
+        <div class="value">1天</div>
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-title">✏️ 记录体重</div>
@@ -188,7 +206,7 @@
           <thead>
             <tr><th>日期</th><th>体重</th><th>备注</th></tr>
           </thead>
-          <tbody></tbody>
+          <tbody><tr><td>2026-05-07</td><td>56.6</td><td class='note'></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -197,7 +215,7 @@
   </div>
 
   <script>
-    const chartData = {"labels": [], "weights": [], "ma7": [], "target": 45, "maxIdx": 0, "maxVal": 0, "minIdx": 0, "minVal": 0, "rawDates": []};
+    const chartData = {"labels": ["05-07"], "weights": [56.6], "ma7": [null], "target": 45, "maxIdx": 0, "maxVal": 56.6, "minIdx": 0, "minVal": 56.6, "rawDates": ["2026-05-07"]};
 
     function initChart() {
       const ctx = document.getElementById('weightChart').getContext('2d');
