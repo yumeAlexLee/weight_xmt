@@ -190,7 +190,7 @@
           ctx.restore();
         }
       };
-      new Chart(ctx, {
+      window.myChart = new Chart(ctx, {
         type: 'line',
         data: { labels: chartData.labels, datasets: datasets },
         options: {
@@ -294,11 +294,36 @@
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.content) {
-          showToast('✅ 记录成功！数据更新中...', 'success');
+          showToast('✅ 记录成功！', 'success');
           document.getElementById('input-weight').value = '';
           document.getElementById('input-note').value = '';
-          // 自动刷新，等工作流和 Pages 同步
-          setTimeout(function() { location.reload(); }, 12000);
+          // 即时更新图表
+          var today = date;
+          var shortDate = today.slice(5);
+          chartData.labels.push(shortDate);
+          chartData.rawDates.push(today);
+          chartData.weights.push(parseFloat(weight));
+          // 重建图表
+          if (window.myChart) window.myChart.destroy();
+          initChart();
+          // 更新表格
+          var tbody = document.querySelector('table tbody');
+          var newRow = document.createElement('tr');
+          newRow.innerHTML = '<td>' + date + '</td><td>' + weight + '</td><td class="note">' + (note || '') + '</td>';
+          tbody.insertBefore(newRow, tbody.firstChild);
+          // 更新统计卡片
+          var w = parseFloat(weight);
+          var statsGrid = document.querySelector('.stats-grid');
+          if (statsGrid) {
+            var lost = (chartData.weights[0] - w).toFixed(1);
+            var remaining = (w - 45).toFixed(1);
+            var cells = statsGrid.querySelectorAll('.value');
+            if (cells.length >= 4) {
+              cells[0].textContent = w + 'kg';
+              cells[1].textContent = (lost > 0 ? '+' : '') + lost + 'kg';
+              cells[2].textContent = remaining + 'kg';
+            }
+          }
         } else {
           if (data.message && data.message.includes('Bad credentials')) {
             showToast('❌ 令牌无效或已过期，请重新输入', 'error');
