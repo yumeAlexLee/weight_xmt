@@ -11,7 +11,6 @@ from datetime import datetime
 CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "weight.csv")
 HTML_PATH = os.path.join(os.path.dirname(__file__), "..", "docs", "index.html")
 TARGET_WEIGHT = 45
-WORKER_URL = os.environ.get("WORKER_URL", "https://weight-xmt.yumealexlee.workers.dev")
 
 
 def read_weight_data():
@@ -56,7 +55,7 @@ def generate_html(records, stats):
         if i < 6:
             ma7.append(None)
         else:
-            ma7.append(round(sum(weights[i-6:i+1]) / 7, 2))
+            ma7.append(round(sum(weights[i - 6:i + 1]) / 7, 2))
 
     # Find min/max
     max_w = max(weights) if weights else 0
@@ -84,9 +83,11 @@ def generate_html(records, stats):
         )
 
     stats_cards = ""
+    remaining_display = ""
     if stats:
         loss_class = "loss" if stats["lost"] > 0 else "gain" if stats["lost"] < 0 else "neutral"
         remaining = round(stats["current_weight"] - TARGET_WEIGHT, 1)
+        remaining_display = f"<div class='value'>{remaining}kg</div>"
         stats_cards = f"""
     <div class="stats-grid">
       <div class="stat-card">
@@ -124,11 +125,9 @@ def generate_html(records, stats):
       padding: 16px;
     }}
     .container {{ max-width: 900px; width: 100%; margin: 0 auto; }}
-
     .header {{ padding: 8px 0 16px; }}
     .header h1 {{ font-size: 22px; font-weight: 700; color: #f1f5f9; }}
     .header p {{ color: #64748b; font-size: 13px; margin-top: 2px; }}
-
     .stats-grid {{
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -147,7 +146,6 @@ def generate_html(records, stats):
     .stat-card .value.loss {{ color: #22c55e; }}
     .stat-card .value.gain {{ color: #ef4444; }}
     .stat-card .value.neutral {{ color: #facc15; }}
-
     .card {{
       background: #1e293b;
       border-radius: 14px;
@@ -155,94 +153,44 @@ def generate_html(records, stats):
       border: 1px solid #334155;
       margin-bottom: 16px;
     }}
-    .card-title {{
-      font-size: 14px;
-      font-weight: 600;
-      color: #cbd5e1;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }}
-
-    .form-grid {{
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }}
-    .form-row-inputs {{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }}
+    .card-title {{ font-size: 14px; font-weight: 600; color: #cbd5e1; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }}
+    .form-grid {{ display: flex; flex-direction: column; gap: 10px; }}
+    .form-row-inputs {{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }}
     .form-group {{ display: flex; flex-direction: column; gap: 4px; }}
     .form-group label {{ font-size: 12px; color: #64748b; font-weight: 500; }}
     .form-group input, .form-group select {{
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 12px 14px;
-      color: #e2e8f0;
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-      -webkit-appearance: none;
-      appearance: none;
+      background: #0f172a; border: 1px solid #334155; border-radius: 10px;
+      padding: 12px 14px; color: #e2e8f0; font-size: 16px;
+      outline: none; transition: border-color 0.2s;
+      -webkit-appearance: none; appearance: none;
     }}
     .form-group input:focus {{ border-color: #3b82f6; }}
     .form-group input::placeholder {{ color: #475569; }}
     .btn {{
-      width: 100%;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      letter-spacing: 0.3px;
+      width: 100%; background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white; border: none; border-radius: 10px;
+      padding: 14px; font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.3px;
     }}
     .btn:active {{ opacity: 0.85; }}
     .btn:disabled {{ opacity: 0.4; cursor: not-allowed; }}
-
     .chart-wrapper {{ padding: 0; border: none; background: transparent; }}
     .chart-wrapper canvas {{ width: 100% !important; }}
-
     .table-wrap {{ overflow-x: auto; margin-top: -4px; }}
     table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
-    th {{
-      text-align: left;
-      padding: 10px 12px;
-      color: #64748b;
-      font-weight: 500;
-      font-size: 12px;
-      border-bottom: 1px solid #334155;
-    }}
+    th {{ text-align: left; padding: 10px 12px; color: #64748b; font-weight: 500; font-size: 12px; border-bottom: 1px solid #334155; }}
     td {{ padding: 10px 12px; border-bottom: 1px solid #1e293b; }}
     td:first-child {{ font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 13px; }}
     tr:last-child td {{ border-bottom: none; }}
     .note {{ color: #94a3b8; font-size: 12px; }}
-
     .toast {{
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      right: 16px;
-      padding: 14px 18px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 500;
-      z-index: 100;
-      display: none;
-      text-align: center;
+      position: fixed; top: 16px; left: 16px; right: 16px;
+      padding: 14px 18px; border-radius: 12px; font-size: 14px;
+      font-weight: 500; z-index: 100; display: none; text-align: center;
     }}
     .toast.success {{ background: #166534; color: #bbf7d0; display: block; }}
     .toast.error {{ background: #7f1d1d; color: #fecaca; display: block; }}
-
     .footer {{ text-align: center; color: #475569; font-size: 12px; padding: 8px 0 40px; }}
-
     @media (min-width: 640px) {{
       body {{ padding: 32px; }}
       .header h1 {{ font-size: 26px; }}
@@ -258,9 +206,7 @@ def generate_html(records, stats):
       <h1>📉 小夏的体重记录</h1>
       <p>记录每日体重变化</p>
     </div>
-
     {stats_cards}
-
     <div class="card">
       <div class="card-title">✏️ 记录体重</div>
       <div class="form-grid">
@@ -282,26 +228,21 @@ def generate_html(records, stats):
       </div>
       <div id="toast" class="toast"></div>
     </div>
-
     <div class="card">
       <div class="card-title">📊 体重变化曲线</div>
       <div class="chart-wrapper">
         <canvas id="weightChart"></canvas>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">📋 记录明细</div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>日期</th><th>体重</th><th>备注</th></tr>
-          </thead>
+          <thead><tr><th>日期</th><th>体重</th><th>备注</th></tr></thead>
           <tbody>{rows_html}</tbody>
         </table>
       </div>
     </div>
-
     <div class="footer">在网站上记录体重即可 ✨</div>
   </div>
 
@@ -310,49 +251,29 @@ def generate_html(records, stats):
 
     function initChart() {{
       const ctx = document.getElementById('weightChart').getContext('2d');
-
-      // Build datasets
       var datasets = [
         {{
           label: '体重 (kg)',
           data: chartData.weights,
           borderColor: '#3b82f6',
           backgroundColor: 'rgba(59, 130, 246, 0.08)',
-          borderWidth: 2.5,
-          pointRadius: 0,
-          pointHitRadius: 8,
-          tension: 0.3,
-          fill: true,
+          borderWidth: 2.5, pointRadius: 0, pointHitRadius: 8,
+          tension: 0.3, fill: true,
         }}
       ];
-
-      // 7-day MA
       if (chartData.ma7 && chartData.ma7.filter(function(v) {{ return v !== null; }}).length > 0) {{
         datasets.push({{
-          label: '7日平均',
-          data: chartData.ma7,
-          borderColor: 'rgba(251, 146, 60, 0.7)',
-          borderWidth: 2,
-          borderDash: [6, 3],
-          pointRadius: 0,
-          tension: 0.4,
-          fill: false,
+          label: '7日平均', data: chartData.ma7,
+          borderColor: 'rgba(251, 146, 60, 0.7)', borderWidth: 2,
+          borderDash: [6, 3], pointRadius: 0, tension: 0.4, fill: false,
         }});
       }}
-
-      // Target line
       var targetLine = new Array(chartData.labels.length).fill(chartData.target);
       datasets.push({{
-        label: '目标 ' + chartData.target + 'kg',
-        data: targetLine,
-        borderColor: 'rgba(34, 197, 94, 0.3)',
-        borderWidth: 1,
-        borderDash: [4, 4],
-        pointRadius: 0,
-        fill: false,
+        label: '目标 ' + chartData.target + 'kg', data: targetLine,
+        borderColor: 'rgba(34, 197, 94, 0.3)', borderWidth: 1,
+        borderDash: [4, 4], pointRadius: 0, fill: false,
       }});
-
-      // Custom plugin for min/max labels (no external CDN needed)
       var labelPlugin = {{
         id: 'minMaxLabels',
         afterDraw: function(chart) {{
@@ -362,92 +283,43 @@ def generate_html(records, stats):
           var maxPt = meta.data[chartData.maxIdx];
           var minPt = meta.data[chartData.minIdx];
           if (!maxPt || !minPt) return;
-
           ctx.save();
           ctx.textAlign = 'center';
-
-          // Max label (red dot + value)
           var mx = maxPt.x, my = maxPt.y;
-          ctx.beginPath();
-          ctx.arc(mx, my, 4, 0, Math.PI * 2);
-          ctx.fillStyle = '#ef4444';
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(mx, my, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#ef4444'; ctx.fill();
           ctx.font = 'bold 10px -apple-system, sans-serif';
           ctx.fillStyle = '#fca5a5';
           ctx.fillText(chartData.maxVal + 'kg', mx, my - 12);
-
-          // Min label (green dot + value)
           var nx = minPt.x, ny = minPt.y;
-          ctx.beginPath();
-          ctx.arc(nx, ny, 4, 0, Math.PI * 2);
-          ctx.fillStyle = '#22c55e';
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(nx, ny, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#22c55e'; ctx.fill();
           ctx.font = 'bold 10px -apple-system, sans-serif';
           ctx.fillStyle = '#86efac';
           ctx.fillText(chartData.minVal + 'kg', nx, ny + 18);
-
           ctx.restore();
         }}
       }};
-
       new Chart(ctx, {{
         type: 'line',
         data: {{ labels: chartData.labels, datasets: datasets }},
         options: {{
-          responsive: true,
-          maintainAspectRatio: true,
-          aspectRatio: 1.6,
+          responsive: true, maintainAspectRatio: true, aspectRatio: 1.6,
           interaction: {{ intersect: false, mode: 'index' }},
           plugins: {{
-            legend: {{
-              position: 'top',
-              align: 'start',
-              labels: {{ color: '#94a3b8', font: {{ size: 11 }}, usePointStyle: true, padding: 12, boxWidth: 10 }}
-            }},
+            legend: {{ position: 'top', align: 'start', labels: {{ color: '#94a3b8', font: {{ size: 11 }}, usePointStyle: true, padding: 12, boxWidth: 10 }} }},
             tooltip: {{
-              backgroundColor: '#1e293b',
-              titleColor: '#e2e8f0',
-              bodyColor: '#cbd5e1',
-              borderColor: '#334155',
-              borderWidth: 1,
-              padding: 10,
-              cornerRadius: 8,
+              backgroundColor: '#1e293b', titleColor: '#e2e8f0', bodyColor: '#cbd5e1',
+              borderColor: '#334155', borderWidth: 1, padding: 10, cornerRadius: 8,
               callbacks: {{
-                title: function(items) {{
-                  var i = items[0].dataIndex;
-                  return chartData.rawDates ? chartData.rawDates[i] : items[0].label;
-                }},
-                label: function(context) {{
-                  if (context.dataset.label.includes('目标')) return context.dataset.label;
-                  return context.parsed.y + 'kg';
-                }}
+                title: function(items) {{ var i = items[0].dataIndex; return chartData.rawDates ? chartData.rawDates[i] : items[0].label; }},
+                label: function(context) {{ if (context.dataset.label.includes('目标')) return context.dataset.label; return context.parsed.y + 'kg'; }}
               }}
             }}
           }},
           scales: {{
-            x: {{
-              grid: {{ display: false }},
-              ticks: {{
-                color: '#64748b',
-                font: {{ size: 10 }},
-                maxRotation: 0,
-                maxTicksLimit: 12,
-                callback: function(val, idx) {{
-                  return chartData.labels[idx];
-                }}
-              }}
-            }},
-            y: {{
-              min: 35,
-              max: 60,
-              grid: {{ color: 'rgba(51, 65, 85, 0.4)' }},
-              ticks: {{
-                color: '#64748b',
-                font: {{ size: 11 }},
-                stepSize: 1,
-                callback: function(v) {{ return v + 'kg'; }}
-              }}
-            }}
+            x: {{ grid: {{ display: false }}, ticks: {{ color: '#64748b', font: {{ size: 10 }}, maxRotation: 0, maxTicksLimit: 12, callback: function(val, idx) {{ return chartData.labels[idx]; }} }} }},
+            y: {{ min: 35, max: 60, grid: {{ color: 'rgba(51, 65, 85, 0.4)' }}, ticks: {{ color: '#64748b', font: {{ size: 11 }}, stepSize: 1, callback: function(v) {{ return v + 'kg'; }} }} }},
           }}
         }},
         plugins: [labelPlugin]
@@ -461,48 +333,92 @@ def generate_html(records, stats):
         document.getElementById('input-date').max = today;
       }}
       if (chartData.labels.length > 0) initChart();
+      if (!localStorage.getItem('gh_pat_weight_xmt')) {{
+        var hint = document.createElement('p');
+        hint.style.cssText = 'color:#facc15;font-size:12px;margin-top:4px;text-align:center';
+        hint.textContent = '💡 首次使用请点击"提交"，输入令牌后即可正常记录';
+        document.querySelector('.form-grid').appendChild(hint);
+      }}
     }});
 
-const WORKER_URL = '{WORKER_URL}';
+    const GH_OWNER = 'yumeAlexLee';
+    const GH_REPO = 'weight_xmt';
+    const CSV_PATH = 'data/weight.csv';
 
-function showToast(msg, type) {{
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast ' + type;
-  setTimeout(function() {{ t.className = 'toast'; }}, 3000);
-}}
+    function getToken() {{ return localStorage.getItem('gh_pat_weight_xmt'); }}
+    function saveToken(t) {{ localStorage.setItem('gh_pat_weight_xmt', t); }}
 
-function addWeight() {{
-  var date = document.getElementById('input-date').value;
-  var weight = document.getElementById('input-weight').value;
-  var note = document.getElementById('input-note').value.trim();
-  if (!date) {{ showToast('请选择日期', 'error'); return; }}
-  if (!weight) {{ showToast('请输入体重', 'error'); return; }}
-  var btn = document.getElementById('btn-submit');
-  btn.disabled = true; btn.textContent = '提交中...';
-
-  fetch(WORKER_URL, {{
-    method: 'POST',
-    headers: {{ 'Content-Type': 'application/json' }},
-    body: JSON.stringify({{ date: date, weight: parseFloat(weight), note: note }})
-  }})
-  .then(function(r) {{ return r.json(); }})
-  .then(function(data) {{
-    if (data.success) {{
-      showToast('✅ 记录成功！请刷新页面', 'success');
-      document.getElementById('input-weight').value = '';
-      document.getElementById('input-note').value = '';
-    }} else {{
-      showToast('❌ ' + (data.error || '提交失败'), 'error');
+    function promptToken() {{
+      var token = prompt('请输入访问令牌 (PAT) 以启用体重提交功能：\\n\\n提示：联系管理员获取令牌，只需输入一次');
+      if (token && token.trim().length > 10) {{ saveToken(token.trim()); showToast('✅ 令牌已保存，可以提交了！', 'success'); return true; }}
+      else if (token) {{ showToast('❌ 令牌格式不正确', 'error'); return false; }}
+      return false;
     }}
-  }})
-  .catch(function(err) {{
-    showToast('❌ 网络错误: ' + err.message, 'error');
-  }})
-  .finally(function() {{
-    btn.disabled = false; btn.textContent = '提交';
-  }});
-}}
+
+    function showToast(msg, type) {{
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ' + type;
+      setTimeout(function() {{ t.className = 'toast'; }}, 3000);
+    }}
+
+    function addWeight() {{
+      var token = getToken();
+      if (!token) {{ if (!promptToken()) return; token = getToken(); }}
+
+      var date = document.getElementById('input-date').value;
+      var weight = document.getElementById('input-weight').value;
+      var note = document.getElementById('input-note').value.trim();
+      if (!date) {{ showToast('请选择日期', 'error'); return; }}
+      if (!weight) {{ showToast('请输入体重', 'error'); return; }}
+
+      var btn = document.getElementById('btn-submit');
+      btn.disabled = true; btn.textContent = '提交中...';
+
+      var apiUrl = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + CSV_PATH;
+
+      // Read current CSV
+      fetch(apiUrl, {{ headers: {{ 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }} }})
+      .then(function(r) {{ return r.json(); }})
+      .then(function(data) {{
+        var raw = atob(data.content);
+        var decoder = document.createElement('textarea');
+        decoder.innerHTML = raw;
+        var currentContent = decoder.value;
+        var sha = data.sha;
+        var noteStr = note ? ',' + note : ',';
+        var newLine = date + ',' + weight + noteStr + '\\n';
+        var newContent = currentContent + newLine;
+
+        return fetch(apiUrl, {{
+          method: 'PUT',
+          headers: {{ 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' }},
+          body: JSON.stringify({{
+            message: 'add weight: ' + date + ' ' + weight + 'kg',
+            content: btoa(newContent),
+            sha: sha,
+            branch: 'main',
+          }})
+        }});
+      }})
+      .then(function(r) {{ return r.json(); }})
+      .then(function(data) {{
+        if (data.content) {{
+          showToast('✅ 记录成功！请刷新页面', 'success');
+          document.getElementById('input-weight').value = '';
+          document.getElementById('input-note').value = '';
+        }} else {{
+          if (data.message && data.message.includes('Bad credentials')) {{
+            showToast('❌ 令牌无效或已过期，请重新输入', 'error');
+            localStorage.removeItem('gh_pat_weight_xmt');
+          }} else {{
+            showToast('❌ ' + (data.message || '提交失败'), 'error');
+          }}
+        }}
+      }})
+      .catch(function(err) {{ showToast('❌ 网络错误: ' + err.message, 'error'); }})
+      .finally(function() {{ btn.disabled = false; btn.textContent = '提交'; }});
+    }}
   </script>
 </body>
 </html>"""
@@ -511,13 +427,10 @@ function addWeight() {{
 def main():
     records = read_weight_data()
     stats = compute_stats(records)
-
     html = generate_html(records, stats)
-
     os.makedirs(os.path.dirname(HTML_PATH), exist_ok=True)
     with open(HTML_PATH, "w", encoding="utf-8") as f:
         f.write(html)
-
     print(f"✅ Dashboard generated: {HTML_PATH}")
     print(f"   Records: {len(records)}, Current: {stats.get('current_weight', 'N/A')}kg")
 
