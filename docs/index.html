@@ -100,15 +100,15 @@
     <div class="stats-grid">
       <div class="stat-card">
         <div class="label">当前体重</div>
-        <div class="value">56.6kg</div>
+        <div class="value">111.0kg</div>
       </div>
       <div class="stat-card">
         <div class="label">已减</div>
-        <div class="value neutral">0.0kg</div>
+        <div class="value gain">-54.4kg</div>
       </div>
       <div class="stat-card">
         <div class="label">剩余</div>
-        <div class="value">11.6kg</div>
+        <div class="value">66.0kg</div>
       </div>
       <div class="stat-card">
         <div class="label">已记录</div>
@@ -147,7 +147,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>日期</th><th>体重</th><th>备注</th></tr></thead>
-          <tbody><tr><td>2026-05-07</td><td>56.6</td><td class='note'></td></tr></tbody>
+          <tbody><tr><td>2026-05-07</td><td>111.0</td><td class='note'>111</td></tr><tr><td>2026-05-07</td><td>56.6</td><td class='note'></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -155,7 +155,7 @@
   </div>
 
   <script>
-    const chartData = {"labels": ["05-07"], "weights": [56.6], "ma7": [null], "target": 45, "maxIdx": 0, "maxVal": 56.6, "minIdx": 0, "minVal": 56.6, "rawDates": ["2026-05-07"]};
+    const chartData = {"labels": ["05-07", "05-07"], "weights": [56.6, 111.0], "ma7": [null, null], "target": 45, "maxIdx": 1, "maxVal": 111.0, "minIdx": 0, "minVal": 56.6, "rawDates": ["2026-05-07", "2026-05-07"]};
 
     function initChart() {
       const ctx = document.getElementById('weightChart').getContext('2d');
