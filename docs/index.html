@@ -151,24 +151,6 @@
     </div>
 
     
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="label">当前体重</div>
-        <div class="value">53.2kg</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">已减</div>
-        <div class="value loss">+1.8kg</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">剩余</div>
-        <div class="value">8.2kg</div>
-      </div>
-      <div class="stat-card">
-        <div class="label">已记录</div>
-        <div class="value">9天</div>
-      </div>
-    </div>
 
     <div class="card">
       <div class="card-title">✏️ 记录体重</div>
@@ -206,7 +188,7 @@
           <thead>
             <tr><th>日期</th><th>体重</th><th>备注</th></tr>
           </thead>
-          <tbody><tr><td>2026-05-09</td><td>53.2</td><td class='note'>最终测试</td></tr><tr><td>2026-05-08</td><td>53.5</td><td class='note'>从网页提交</td></tr><tr><td>2026-05-07</td><td>54.0</td><td class='note'>测试提交</td></tr><tr><td>2026-05-08</td><td>53.8</td><td class='note'></td></tr><tr><td>2026-05-07</td><td>54.0</td><td class='note'>今日</td></tr><tr><td>2026-05-06</td><td>54.3</td><td class='note'>好调</td></tr><tr><td>2026-05-05</td><td>54.5</td><td class='note'></td></tr><tr><td>2026-05-04</td><td>54.6</td><td class='note'></td></tr><tr><td>2026-05-03</td><td>55.1</td><td class='note'></td></tr><tr><td>2026-05-02</td><td>54.8</td><td class='note'></td></tr><tr><td>2026-05-01</td><td>55.0</td><td class='note'>开始记录</td></tr></tbody>
+          <tbody></tbody>
         </table>
       </div>
     </div>
@@ -215,7 +197,7 @@
   </div>
 
   <script>
-    const chartData = {"labels": ["05-01", "05-02", "05-03", "05-04", "05-05", "05-06", "05-07", "05-08", "05-07", "05-08", "05-09"], "weights": [55.0, 54.8, 55.1, 54.6, 54.5, 54.3, 54.0, 53.8, 54.0, 53.5, 53.2], "ma7": [null, null, null, null, null, null, 54.61, 54.44, 54.33, 54.1, 53.9], "target": 45, "maxIdx": 2, "maxVal": 55.1, "minIdx": 10, "minVal": 53.2, "rawDates": ["2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-07", "2026-05-08", "2026-05-09"]};
+    const chartData = {"labels": [], "weights": [], "ma7": [], "target": 45, "maxIdx": 0, "maxVal": 0, "minIdx": 0, "minVal": 0, "rawDates": []};
 
     function initChart() {
       const ctx = document.getElementById('weightChart').getContext('2d');
